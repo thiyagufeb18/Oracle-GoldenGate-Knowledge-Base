@@ -1,0 +1,424 @@
+Bi-Directional Logs:
+======================
+register EXTRACT MSE1_UAT  database container (hrms2uat)
+add EXTRACT MSE1_UAT integrated tranlog begin now
+add exttrail /u02/app/oracle/product/19.0.0/ogg_source/dirdat/mssql/uatbi/ba, extract MSE1_UAT
+add EXTRACT MSP1_UAT exttrailsource /u02/app/oracle/product/19.0.0/ogg_source/dirdat/mssql/uatbi/ba
+add rmttrail F:\gghome\gg21\dirdat\mssql\uatbi\bb extract MSP1_UAT
+
+
+>> Primary Extract and  Pump Processes configuration
+=====================================================
+
+GGSCI (HRMS2-DB-PP03) 8> DBLogin USerIDAlias GG_HRMS2UAT_SOURCEDB
+Successfully logged into database CDB$ROOT.
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 9> register EXTRACT MSE1_UAT  database container (hrms2uat)
+
+2024-12-20 14:32:17  INFO    OGG-02003  Extract group MSE1_UAT successfully registered with database at SCN 92480567138.
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 10> add EXTRACT MSE1_UAT integrated tranlog begin now
+Integrated Extract added.
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 11> add exttrail /u02/app/oracle/product/19.0.0/ogg_source/dirdat/mssql/uatbi/ba, extract MSE1_UAT
+EXTTRAIL added.
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 12> add EXTRACT MSP1_UAT exttrailsource /u02/app/oracle/product/19.0.0/ogg_source/dirdat/mssql/uatbi/ba
+Extract added.
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 13> add rmttrail F:\gghome\gg21\dirdat\mssql\uatbi\bb extract MSP1_UAT
+RMTTRAIL added.
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 14> view params MSE1_UAT
+
+EXTRACT MSE1_UAT
+SETENV(ORACLE_HOME="/u02/app/oracle/product/19.0.0/dbhome_1")
+SETENV(LD_LIBRARY_PATH="/u02/app/oracle/product/19.0.0/dbhome_1/lib:/lib:/usr/lib")
+SETENV(TNS_ADMIN = "/u02/app/oracle/product/19.0.0/dbhome_1/network/admin")
+USERIDALIAS GG_HRMS2UAT_SOURCEDB
+TRANLOGOPTIONS INTEGRATEDPARAMS (MAX_SGA_SIZE 100)
+TRANLOGOPTIONS EXCLUDETAG 01
+NOCOMPRESSUPDATES
+NOCOMPRESSDELETES
+EXTTRAIL /u02/app/oracle/product/19.0.0/ogg_source/dirdat/mssql/uatbi/ba
+----Adding Table for Bi-Directional Replication Oracle and SQL Server (UAT)
+TABLE HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION,COLSEXCEPT (REQUESTED_BY_TYPE_ID,TRANSACTION_NUMBER,IS_ACTIVE,FILE_NO,IS_DRAFT,FILE_ID,KGID_N
+O,STAGE_ID,IS_ORDER_GENERATED,ORDER_GENERATED_DATE,DDO_STATUS,WORKFLOW_REMARK_TEXT,PAYBILL_ID,REQUESTED_BY,RECV_NO,IS_REQUESTED_AMOUNT,PAYBILL_GENERATED);
+
+**********************************************************************************************************************************
+
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 17> view params MSP1_UAT
+
+EXTRACT MSP1_UAT
+SETENV(ORACLE_HOME="/u02/app/oracle/product/19.0.0/dbhome_1")
+SETENV(LD_LIBRARY_PATH="/u02/app/oracle/product/19.0.0/dbhome_1/lib:/lib:/usr/lib")
+SETENV(TNS_ADMIN = "/u02/app/oracle/product/19.0.0/dbhome_1/network/admin")
+USERIDALIAS GG_HRMS2UAT_SOURCEDB
+RMTHOST 172.31.66.48,MGRPORT 7809
+RMTTRAIL F:\gghome\gg21\dirdat\mssql\uatbi\bb
+--------------------------------------------New Table for Bi-Directional --------------------
+TABLE HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION;
+
+***********************************************************************************************************************************************
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 18> info MSE1_UAT, detail
+
+Extract    MSE1_UAT  Initialized  2024-12-20 14:33   Status STOPPED
+Checkpoint Lag       00:00:00 (updated 00:05:43 ago)
+Log Read Checkpoint  Oracle Integrated Redo Logs
+                     2024-12-20 14:33:09
+                     SCN 0.0 (0)
+
+  Target Extract Trails:
+
+  Trail Name                                       Seqno        RBA     Max MB Trail Type
+
+  /u02/app/oracle/product/19.0.0/ogg_source/dirdat/mssql/uatbi/ba          0          0        500 EXTTRAIL
+
+
+Integrated Extract outbound server first scn: 21.2286253437 (92480566653)
+
+Integrated Extract outbound server filtering start scn: 21.2286253922 (92480567138)
+
+  Extract Source                          Begin             End
+
+  Not Available                           * Initialized *   2024-12-20 14:33:09.00
+
+
+Current directory    /u02/app/oracle/product/19.0.0/ogg_source
+
+Report file          /u02/app/oracle/product/19.0.0/ogg_source/dirrpt/MSE1_UAT.rpt (does not yet exist)
+Parameter file       /u02/app/oracle/product/19.0.0/ogg_source/dirprm/mse1_uat.prm
+Checkpoint file      /u02/app/oracle/product/19.0.0/ogg_source/dirchk/MSE1_UAT.cpe
+Process file         /u02/app/oracle/product/19.0.0/ogg_source/dirpcs/MSE1_UAT.pce
+Error log            /u02/app/oracle/product/19.0.0/ogg_source/ggserr.log
+
+*********************************************************************************************************************************************************
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 19> info MSP1_UAT, detail
+
+Extract    MSP1_UAT  Initialized  2024-12-20 14:33   Status STOPPED
+Checkpoint Lag       00:00:00 (updated 00:05:12 ago)
+Log Read Checkpoint  File /u02/app/oracle/product/19.0.0/ogg_source/dirdat/mssql/uatbi/ba000000000
+                     First Record  RBA 0
+
+  Target Extract Trails:
+
+  Trail Name                                       Seqno        RBA     Max MB Trail Type
+
+  F:\gghome\gg21\dirdat\mssql\uatbi\bb                 0          0        500 RMTTRAIL
+
+  Extract Source                          Begin             End
+
+  /u02/app/oracle/product/19.0.0/ogg_source/dirdat/mssql/uatbi/ba000000000  * Initialized *   First Record
+
+
+Current directory    /u02/app/oracle/product/19.0.0/ogg_source
+
+Report file          /u02/app/oracle/product/19.0.0/ogg_source/dirrpt/MSP1_UAT.rpt (does not yet exist)
+Parameter file       /u02/app/oracle/product/19.0.0/ogg_source/dirprm/msp1_uat.prm
+Checkpoint file      /u02/app/oracle/product/19.0.0/ogg_source/dirchk/MSP1_UAT.cpe
+Process file         /u02/app/oracle/product/19.0.0/ogg_source/dirpcs/MSP1_UAT.pce
+Error log            /u02/app/oracle/product/19.0.0/ogg_source/ggserr.log
+
+********************************************************************************************************************************************************
+
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg/CDB$ROOT) 20> info trandata HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION
+
+2024-12-20 14:40:09  INFO    OGG-26035  Logical replication for table HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION is ENABLED.
+
+2024-12-20 14:40:09  INFO    OGG-10471  ***** Oracle Goldengate support information on table HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION *****
+Oracle Goldengate support native capture on table HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION.
+Oracle Goldengate marked following column as key columns on table HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION: APPLICATION_ID.
+
+Logging of supplemental redo log data is enabled for table HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION.
+
+All columns supplementally logged for table HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION.
+
+Prepared CSN for table HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION: 92350615605
+
+***************************************************************************************
+**************** SQL Server Side *****************************************************
+***************************************************************************************
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 47> add replicat MSR1_UAT exttrail F:\gghome\gg21\dirdat\mssql\uatbi\bb
+Replicat added.
+
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 49> info MSR1_UAT, detail
+
+Replicat   MSR1_UAT  Initialized  2024-12-19 17:50   Status STOPPED
+Checkpoint Lag       00:00:00 (updated 00:00:21 ago)
+Log Read Checkpoint  File F:\gghome\gg21\dirdat\mssql\uatbi\bb000000000
+                     First Record  RBA 0
+
+Current Log BSN value: (no data)
+
+Last Committed Transaction CSN value: (no data)
+
+  Extract Source                          Begin             End
+
+  F:\gghome\gg21\dirdat\mssql\uatbi\bb000000000  * Initialized *   First Record
+
+
+Current directory    F:\gghome\gg21
+
+Report file          F:\gghome\gg21\dirrpt\MSR1_UAT.rpt (does not yet exist)
+Parameter file       F:\gghome\gg21\dirprm\MSR1_UAT.prm
+Checkpoint file      F:\gghome\gg21\dirchk\MSR1_UAT.cpr
+Checkpoint table     ggadmin.ggcheck
+Process file         F:\gghome\gg21\dirpcs\MSR1_UAT.pcr
+Error log            F:\gghome\gg21\ggserr.log
+
+Replicat Param File 
+====================
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 50> view params MSR1_UAT
+REPLICAT MSR1_UAT
+TARGETDB HRMS2ESS userid ggadmin, password ggadmin123
+REPERROR default, discard
+discardfile F:\gghome\gg21\dirrpt\msr1_uat.dsc, purge, megabytes 4096
+TRANLOGOPTIONS FILTERTABLE ggadmin.ggcheck  ----> checkpoint table name as per GLOBALS File 
+--------------------------------------------------------------------------------------------------
+-------TABLE IS ADDED FOR BI-DIRECTIONAL REPLICATION  ---------------------------------------------
+----------------------------------------------------------------------------------------------------
+MAP HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION, TARGET DBO.T_EMPLOYEE_ADVANCE_DETAILS,
+COLMAP (
+employee_id=employee_id,
+remark=remark_text,
+status=status,
+created_by=created_by,
+created_date=created_date,
+request_type_id=loan_advance_type_id,
+reason_type_id=reason_type_id,
+installment_type=installment_type,
+requested_amount=requested_amount,
+sanctioned_amount=sanctioned_amount,
+maximum_amount=maximum_amount,
+eligibility_amount=eligibility_amount,
+interest_rate=interest_rate,
+no_of_installment=no_of_installment,
+user_term_type=user_term_type,
+total_emi_amount=total_emi_amount,
+start_date=emi_start_month,
+document_path=document_path,
+last_updated_by=lastupdated_by,
+last_updated_date=lastupdated_date,
+workflow_status_id=workflow_status_id,
+total_interest_amount=total_interest_amount,
+t_employee_advance_details_id=application_id,
+total_principal_amount=total_principal_amount,
+sanction_user_term_type=sanction_user_term_type,
+sanction_emi_start_month=sanction_emi_start_month,
+sanction_installment_type=sanction_installment_type,
+sanction_total_emi_amount=sanction_total_emi_amount,
+advance_request_sub_type_id=loan_advance_sub_type_id,
+sanction_no_of_installment=sanction_no_of_installment,
+sanction_total_interest_amount=sanction_total_interest_amount,
+sanction_total_principal_amount=sanction_total_principal_amount,
+total_principal_plus_interest_amount=total_principal_plus_interest_amount,
+sanction_total_principal_plus_interest_am=sanction_total_principal_plus_interest_amount);
+---- CDR Part instructed to discard for following operations --------------------
+--,
+--COMPARECOLS (ON UPDATE ALL, ON DELETE ALL),
+--RESOLVECONFLICT (INSERTROWEXISTS, (DEFAULT,DISCARD )),
+--RESOLVECONFLICT (UPDATEROWEXISTS, (DEFAULT,DISCARD )),
+--RESOLVECONFLICT (UPDATEROWMISSING,(DEFAULT,DISCARD )),
+--RESOLVECONFLICT (DELETEROWEXISTS, (DEFAULT,DISCARD )),
+--RESOLVECONFLICT (DELETEROWMISSING,(DEFAULT,DISCARD ));
+
+********************************** 2nd Set Configuration **********************************************************
+*******************************************************************************************************************
+
+EXTRACT and PUMP Configuration on MS-SQL Side
+=================================================
+
+
+>> Primary EXTRACT Configuration
+================================
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 80> add extract MSE2_UAT , TRANLOG BEGIN NOW
+Extract added.
+
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 81> add exttrail F:\gghome\gg21\dirdat\mssql\uatbiext\bc, extract MSE2_UAT
+EXTTRAIL added.
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 83> view params MSE2_UAT
+EXTRACT MSE2_UAT
+SOURCEDB HRMS2ESS userid ggadmin password ggadmin123
+TRANLOGOPTIONS IGNOREREPLICATES
+TRANLOGOPTIONS FILTERTABLE ggadmin.ggcheck
+EXTTRAIL F:\gghome\gg21\dirdat\mssql\uatbiext\bc
+TABLE dbo.t_employee_advance_details;
+
+>> PUMP configuration
+=========================
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 84> add extract MSP2_UAT , EXTTRAILSOURCE F:\gghome\gg21\dirdat\mssql\uatbiext\bc
+Extract added.
+
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 85> add rmttrail /u02/app/oracle/product/19.0.0/ogg_target/dirdat/mssql/uatbi/bd, EXTRACT MSP2_UAT
+RMTTRAIL added.
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 87> view params MSP2_UAT
+EXTRACT MSP2_UAT
+RMTHOST 172.31.20.113, MGRPORT 7810
+RMTTRAIL /u02/app/oracle/product/19.0.0/ogg_target/dirdat/mssql/uatbi/bd
+TABLE dbo.t_employee_advance_details;
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 89> info EXTRACT MSE2_UAT, detail
+
+Extract    MSE2_UAT  Initialized  2024-12-20 17:17   Status STOPPED
+Checkpoint Lag       00:00:00 (updated 00:08:33 ago)
+VAM Read Checkpoint  2024-12-20 17:17:21.515000
+
+
+  Target Extract Trails:
+
+  Trail Name                                       Seqno        RBA     Max MB Trail Type
+
+  F:\gghome\gg21\dirdat\mssql\uatbiext\bc              0          0        500 EXTTRAIL
+
+  Extract Source                          Begin             End
+
+  Not Available                           * Initialized *   2024-12-20 17:17:21.51
+
+
+Current directory    F:\gghome\gg21
+
+Report file          F:\gghome\gg21\dirrpt\MSE2_UAT.rpt (does not yet exist)
+Parameter file       F:\gghome\gg21\dirprm\MSE2_UAT.prm
+Checkpoint file      F:\gghome\gg21\dirchk\MSE2_UAT.cpe
+Process file         F:\gghome\gg21\dirpcs\MSE2_UAT.pce
+Error log            F:\gghome\gg21\ggserr.log
+
+
+GGSCI (HRMS2-DB-VP10 as ggadmin@HRMS2ESS) 90> info EXTRACT MSP2_UAT, detail
+
+Extract    MSP2_UAT  Initialized  2024-12-20 17:21   Status STOPPED
+Checkpoint Lag       00:00:00 (updated 00:04:11 ago)
+Log Read Checkpoint  File F:\gghome\gg21\dirdat\mssql\uatbiext\bc000000000
+                     First Record  RBA 0
+
+  Target Extract Trails:
+
+  Trail Name                                       Seqno        RBA     Max MB Trail Type
+
+  /u02/app/oracle/product/19.0.0/ogg_target/dirdat/mssql/uatbi/bd          0          0        500 RMTTRAIL
+
+  Extract Source                          Begin             End
+
+  F:\gghome\gg21\dirdat\mssql\uatbiext\bc000000000  * Initialized *   First Record
+
+
+Current directory    F:\gghome\gg21
+
+Report file          F:\gghome\gg21\dirrpt\MSP2_UAT.rpt (does not yet exist)
+Parameter file       F:\gghome\gg21\dirprm\MSP2_UAT.prm
+Checkpoint file      F:\gghome\gg21\dirchk\MSP2_UAT.cpe
+Process file         F:\gghome\gg21\dirpcs\MSP2_UAT.pce
+Error log            F:\gghome\gg21\ggserr.log
+
+================================ Replicat configuration on ORACLE SIDE =============================================
+
+GGSCI (HRMS2-DB-PP03) 4> DBLogin UseRIDAlias C##GGADMIN_HRMS2UAT
+Successfully logged into database HRMS2UAT.
+
+
+REPLICAT MSR2_UAT
+SETENV(ORACLE_HOME="/u02/app/oracle/product/19.0.0/dbhome_1")
+SETENV(LD_LIBRARY_PATH="/u02/app/oracle/product/19.0.0/dbhome_1/lib:/lib:/usr/lib")
+SETENV(TNS_ADMIN = "/u02/app/oracle/product/19.0.0/dbhome_1/network/admin")
+USERIDALIAS C##GGADMIN_HRMS2UAT
+DBOPTIONS INTEGRATEDPARAMS(parallelism 2)
+DBOPTIONS SETTAG 01
+DISCARDFILE ./dirrpt/msr2_uat.dsc, purge, megabytes 4096
+--REPERROR default, discard--
+--REPERROR (-1403, discard)
+--REPERROR (-1, discard)
+--REPERROR (-02291, discard)
+--Including Marco
+--INCLUDE /u02/app/oracle/product/19.0.0/ogg_target/add_exception.mac
+MAP DBO.T_EMPLOYEE_ADVANCE_DETAILS,  TARGET HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION,  
+COLMAP (USEDEFAULTS,
+remark_text=remark,
+loan_advance_type_id=request_type_id,
+emi_start_month=start_date,
+lastupdated_by=last_updated_by,
+lastupdated_date=last_updated_date,
+application_id=t_employee_advance_details_id,
+loan_advance_sub_type_id=advance_request_sub_type_id,
+REQUESTED_BY_TYPE_ID=COLSTAT(MISSING),
+TRANSACTION_NUMBER=COLSTAT(MISSING),
+IS_ACTIVE=COLSTAT(MISSING),
+FILE_NO=COLSTAT(MISSING),
+IS_DRAFT=COLSTAT(MISSING),
+FILE_ID=COLSTAT(MISSING),
+KGID_NO=COLSTAT(MISSING),
+STAGE_ID=COLSTAT(MISSING),
+IS_ORDER_GENERATED=COLSTAT(MISSING),
+ORDER_GENERATED_DATE=COLSTAT(MISSING),
+DDO_STATUS=COLSTAT(MISSING),
+WORKFLOW_REMARK_TEXT=COLSTAT(MISSING),
+PAYBILL_ID=COLSTAT(MISSING),
+RECV_NO=COLSTAT(MISSING),
+IS_REQUESTED_AMOUNT=COLSTAT(MISSING),
+PAYBILL_GENERATED=COLSTAT(MISSING),
+REQUESTED_BY=CASE 
+WHEN OPERATION = 'INSERT' THEN 'ESSRequest' 
+ELSE 'HRMS2Migrate'
+END);
+--,
+--COMPARECOLS (ON UPDATE ALL, ON DELETE ALL),
+--RESOLVECONFLICT (INSERTROWEXISTS, (DEFAULT,DISCARD )),
+--RESOLVECONFLICT (UPDATEROWEXISTS, (DEFAULT,DISCARD )),
+--RESOLVECONFLICT (UPDATEROWMISSING,(DEFAULT,DISCARD )),
+--RESOLVECONFLICT (DELETEROWEXISTS, (DEFAULT,DISCARD )),
+--RESOLVECONFLICT (DELETEROWMISSING,(DEFAULT,DISCARD ));
+
+GGSCI (HRMS2-DB-PP03 as c##ggadmin@hrms2stg) 8> info MSR2_UAT, detail
+
+Replicat   MSR2_UAT  Initialized  2024-12-20 17:41   Status STOPPED
+INTEGRATED
+Checkpoint Lag       00:00:00 (updated 00:00:40 ago)
+Log Read Checkpoint  File /u02/app/oracle/product/19.0.0/ogg_target/dirdat/mssql/uatbi/bd000000000
+                     First Record  RBA 0
+
+INTEGRATED Replicat
+DBLOGIN Provided, no inbound server is defined
+
+
+Current Log BSN value: (no data)
+
+Low Watermark CSN value: (no data)
+
+High Watermark CSN value: (no data)
+
+  Extract Source                          Begin             End
+
+  /u02/app/oracle/product/19.0.0/ogg_target/dirdat/mssql/uatbi/bd000000000  * Initialized *   First Record
+
+
+Current directory    /u02/app/oracle/product/19.0.0/ogg_target
+
+Report file          /u02/app/oracle/product/19.0.0/ogg_target/dirrpt/MSR2_UAT.rpt (does not yet exist)
+Parameter file       /u02/app/oracle/product/19.0.0/ogg_target/dirprm/msr2_uat.prm
+Checkpoint file      /u02/app/oracle/product/19.0.0/ogg_target/dirchk/MSR2_UAT.cpr
+Process file         /u02/app/oracle/product/19.0.0/ogg_target/dirpcs/MSR2_UAT.pcr
+Error log            /u02/app/oracle/product/19.0.0/ogg_target/ggserr.log
+
+>> Captured SCN from Oracle :
+=================================
+
+SYS@hrms2stg >@scn.sql;
+
+       CURRENT_SCN
+------------------
+       9248 5872 799
+
+
+SELECT min([tran_begin_lsn]) FROM [cdc].[lsn_time_mapping] with (nolock) where tran_id <> 0x00   -------->  0x00002E99000017830001
