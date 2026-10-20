@@ -1,0 +1,125 @@
+
+Today's GG Issue and Resolution
+********************************
+
+We configured Bi-directional replication between Oracle and MS-SQL.
+Oracle and Ms-SQL Tables structures are NON-IDENTICAL and we made MS-SQL PK column as "Identity column".
+We tried to test DML operations from MS-SQL to Oracle; 5 Insert statements were executed.
+2 insert statements were captured after that EXTRACT did not capture Single SQL, 
+After stopping Primary Extract, we attempted to restart it. The CDC Capture Job was not operating, and it was continuously abending.  
+
+We do not have any clue in Extract report file, ggserr log file including DB Log file.
+40+ hrs Oracle DB was out of sync with MS-SQL !!
+
+When started our analysis from  GG*_CT table.
+We observed that insert statements were not captured by EXTRACT within the *_CT Tables.
+
+Resolution : 
+**************
+
+Our approach has started ...
+
+1) Capture Job & Cleanup Job deleted and Re-created.
+2) Cleanup done existing GoldenGate metadata tables.
+3) Recreated the channel and CDC jobs.
+
+1) To delete and recreate capture Jobs 
+-----------------------------------------
+
+exec sp_cdc_drop_job 'cleanup';
+exec sp_cdc_drop_job 'capture';
+EXEC sys.sp_cdc_create_db                        -->  To enable Change Data Capture at the database level.
+EXEC sys.sp_cdc_add_job @job_type = N'capture';  -->  Creates the job that will process the transaction log for changes.
+EXEC sys.sp_cdc_start_job @job_type = 'capture'; -->  To begin capturing changes.
+
+
+2) cleanedup existing GoldenGate metadata tables.
+---------------------------------------------------
+ggadmin.ggcheck_lox
+ggadmin.OracleGGExtractCheckpoint
+ggadmin.OracleGGTranTables
+ggadmin.OracleGGCleanupJobStatus
+
+3) Trandata deleted for business tables and ggadmin.checkpoint table
+
+Checkpoint table deleted --> ggadmin.checkpoint
+Trandata deleted for 700+ tables (all tables part of the database) including *_CT Tables.
+
+4) GG Processes were deleted and recreated. 
+
+=> Extract process was deleted and recreated. 
+=> Replicat processes were deleted and recreated. 
+
+5) Unable to bringup Replicat & Extract processes for Various reasons.
+**************************************************************************
+
+>> Error For Replicat :
+************************
+
+Source Context :
+  SourceModule            : [er.chkpt.db]
+  SourceID                : [er/chkptdb.c]
+  SourceMethod            : [ggs::er::ReplicatContext::compareDBCheckpointPosition]
+  SourceLine              : [258]
+  ThreadBacktrace         : [14] elements
+                          : [F:\gghome\gg21\gglog.dll(??1CContextItem@@UEAA@XZ)]
+                          : [F:\gghome\gg21\gglog.dll(?CreateMessage@CMessageFactory@@QEAAPEAVCMessage@@PEAVCSourceContext@@IZZ)]
+                          : [F:\gghome\gg21\gglog.dll(?_MSG_String@@YAPEAVCMessage@@PEAVCSourceContext@@HPEBDW4MessageDisposition@CMessageFactory@@@Z)]
+                          : [F:\gghome\gg21\replicat.exe()]
+                          : [F:\gghome\gg21\replicat.exe(ERCALLBACK)]
+                          : [F:\gghome\gg21\replicat.exe(_ggTryDebugHook)]
+                          : [F:\gghome\gg21\replicat.exe(ERCALLBACK)]
+                          : [F:\gghome\gg21\replicat.exe(_ggTryDebugHook)]
+                          : [F:\gghome\gg21\replicat.exe(_ggTryDebugHook)]
+                          : [F:\gghome\gg21\replicat.exe(_ggTryDebugHook)]
+                          : [F:\gghome\gg21\replicat.exe(ERCALLBACK)]
+                          : [F:\gghome\gg21\replicat.exe(CommonLexerNewSSD)]
+                          : [C:\WINDOWS\System32\KERNEL32.DLL(BaseThreadInitThunk)]
+                          : [C:\WINDOWS\SYSTEM32\ntdll.dll(RtlUserThreadStart)]
+
+ERROR   OGG-00446  No data selecting position from checkpoint table (checkpoint: 'ggadmin.ggcheck', group: 'MSR1_UAT', key: 0x58530d43).
+ERROR   OGG-01668  PROCESS ABENDING.
+
+Solution : 
+***********
+
+-> Replicat processes deleted and recreated, ggadmin.checkpoint table too.
+-> Trandata Enabled for ggadmin.checkpointtable
+
+
+>> Extract process started with below warnings ..
+***************************************************]
+
+>> Warings observed Within the report Extract Report File
+***********************************************************
+
+INFO    OGG-05332  The Oracle GoldenGate CDC Cleanup job, 'OracleGGCleanup_hrms2ess_Job', created on 2024-09-04 14:21:08.450, is enabled in database, '*********'.
+WARNING OGG-05280  Could not retrieve the Oracle GoldenGate CDC Cleanup Job settings for database hrms2ess. 
+Ensure that the Oracle GoldenGate CDC Cleanup Job exists and is enabled on the database.
+
+***********************************************************************
+**                     Run Time Messages                             **
+
+Cleanup Job Issues
+********************
+
+Purpose is ---> CDC cleanup job for maintaining and purging old data from the CDC tables in the SQL Server database.
+
+shell ogg_cdc_cleanup_setup.bat dropjob ggadmin   ********* hrms2ess XXXXX-DB-XYXYX ggadmin  --> Drop an Existing CDC Cleanup Job
+shell ogg_cdc_cleanup_setup.bat createjob ggadmin ********* hrms2ess XXXXX-DB-XYXYX ggadmin  --> Create a New CDC Cleanup Job
+
+Now we are able to start Extract and replicat processes.
+
+=> Initial load done once again - Bi-directional
+=> Trandata Enabled after initial load to avoid looping Transactions.
+
+FYI: Only High Level Steps and Errors shared, it took few hours for complete troubshoot and for resolution. 
+
+Reason for the issue :
+---------------------- 
+Identity column data was not handled properly on MS-SQL Side.
+Just disabled P.Key and manually inserted duplicate values for auto increment column which is PK column.
+(Duplicate values inserted for auto increment column) so CDC Capture job was unable to capture Sub-sequent transactions. 
+					   
+Regards,
+Thiyagu Sham G  
