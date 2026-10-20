@@ -1,0 +1,305 @@
+
+>> Important Mappings
+#######################
+
+MAP HRMS2CORE.HRMS2CORENEW.HRMS2_EMPLOYEE_PROBATION, TARGET HRMS2UAT.HRMS2DB2.HRMS2_EMPLOYEE_PROBATION, COLMAP (USEDEFAULTS,
+CREATED_BY = @IF(@COLTEST (CREATED_BY,NULL), 999999, CREATED_BY),
+CREATED_DATE= @IF(@COLTEST (CREATED_DATE,NULL), '24-jan-01', CREATED_DATE),
+LASTUPDATED_BY = @IF(@COLTEST (LASTUPDATED_BY,NULL), 999999, LASTUPDATED_BY),
+LASTUPDATED_DATE = @IF(@COLTEST (LASTUPDATED_DATE,NULL), '24-jan-01', CREATED_DATE),
+TRANSACTION_ID = @COLSTAT(MISSING),
+DDO_STATUS=@COLSTAT(MISSING),
+AA_STATUS = @COLSTAT(MISSING),
+
+
+EMPLOYEE_PROBATION_ID CREATED_BY  CREATED_DATE                   LASTUPDATED_BY  LASTUPDATED_DATE
+--------------------- ----------- -------------------------     ---------------  --------------------
+ 114192      22088                       22088
+ 117750      20456                       20456
+ 118773                          27-FEB-15 12.37.36.000000 PM                      27-FEB-15 12.37.36.000000 
+ 224600      13360                                                     13360
+
+HRMS2CORENEW@HRMS2CORE >desc HRMS2_EMPLOYEE_PROBATION
+ Name                                                                          Null?    Type
+ ----------------------------------------------------------------------------- -------- ----------------------------------------------------
+ EMPLOYEE_PROBATION_ID                                                         NOT NULL NUMBER(12)
+ EMPLOYEE_ID                                                                            NUMBER(12)
+ ..
+ ...
+ CREATED_BY                                                                             NUMBER(12)
+ CREATED_DATE                                                                           TIMESTAMP(6)
+ LASTUPDATED_BY                                                                         NUMBER(12)
+ LASTUPDATED_DATE                                                                       TIMESTAMP(6)
+ ACKNOWLEDGE                                                                            CHAR(1)
+ ENQUIRY                                                                                CHAR(1)
+
+###################################################################################################################################################
+
+MAP HRMS2CORE.HRMS2CORENEW.REF_HOA, TARGET HRMS2UAT.HRMS2DB2.REF_HOA, COLMAP (
+USEDEFAULTS,
+CREATED_BY = @IF(@STRLEN(@STRRTRIM(@STRLTRIM(CREATED_BY))) > 0, CREATED_BY, 999999),
+CREATED_DATE = @IF(@STRLEN(@STRRTRIM(@STRLTRIM(CREATED_DATE))) > 0, CREATED_DATE, '24-jan-01'),
+LASTUPDATED_BY = @IF(@STRLEN(@STRRTRIM(@STRLTRIM(LASTUPDATED_BY))) > 0, LASTUPDATED_BY, 999999),
+LASTUPDATED_DATE = @IF(@STRLEN(@STRRTRIM(@STRLTRIM(LASTUPDATED_DATE))) > 0, LASTUPDATED_DATE, '24-jan-01'),
+VOTED_CHARGED = @COLSTAT(MISSING));
+--,FILTER (@GETENV('TRANSACTION', 'CSN') > 88536120298);
+
+
+HRMS2CORENEW@HRMS2CORE >desc REF_HOA
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ HOA_ID                                    NOT NULL NUMBER(6)
+ HOA_NO                                             VARCHAR2(100)
+ HOA_DESCRIPTION                                    VARCHAR2(150)
+ EFFECTIVE_DATE                                     DATE
+ END_DATE                                           DATE
+ HOA_TYPE_ID                                        NUMBER(6)
+ SALARY_HOA_TYPE                                    VARCHAR2(10)
+ GIA_HOA_TYPE                                       VARCHAR2(10)
+ STATUS                                    NOT NULL CHAR(1)
+ CREATED_BY                                         NUMBER(12)
+ CREATED_DATE                                       TIMESTAMP(6)
+ LASTUPDATED_BY                                     NUMBER(12)
+ LASTUPDATED_DATE                                   TIMESTAMP(6)
+ SECTOR_ID                                          NUMBER
+
+
+
+SELECT HOA_ID, CREATED_BY, CREATED_DATE, LASTUPDATED_BY, LASTUPDATED_DATE
+FROM REF_HOA
+WHERE CREATED_BY IS NULL  
+   OR CREATED_DATE IS NULL
+   OR LASTUPDATED_BY IS NULL
+   OR LASTUPDATED_DATE IS NULL;
+
+
+    HOA_ID CREATED_BY CREATED_DATE LASTUPDATED_BY LASTUPDATED_
+---------- ---------- ------------ -------------- ------------
+ 540128
+ 540129
+ 540130
+ 540131
+ 540132
+ 540134
+
+#####################################################################################################################################################
+
+HRMS2UAT(.113) to PRE-PROD (UAT)
+================================
+REPLICAT:
+-----------
+
+MAP HRMS2UAT.HRMS2DB2.HRMS2_EMP_DEPARTMENTAL_EXAM, TARGET HRMS2PP.HRMS2PLUS.HRMS2_EMP_DEPARTMENTAL_EXAM,
+COLMAP(USEDEFAULTS, MIGRATION_FLAG = 'HRMS1');
+
+MAP HRMS2UAT.HRMS2DB2.HRMS2_EMPLOYEE_ALLOWANCE,TARGET HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_ALLOWANCE,
+COLMAP(USEDEFAULTS, MIGRATION_FLAG = 'HRMS1');
+
+MAP HRMS2UAT.HRMS2DB2.HRMS2_EMPLOYEE_BASIC_DTLS,TARGET HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_BASIC_DTLS,
+COLMAP(USEDEFAULTS, MIGRATION_FLAG = 'HRMS1');
+
+MAP HRMS2UAT.HRMS2DB2.HRMS2_EMPLOYEE_PAYBILL_DTLS, TARGET HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_PAYBILL_DTLS, 
+COLMAP(USEDEFAULTS, MIGRATION_FLAG = 'HRMS1');
+
+MAP HRMS2UAT.HRMS2DB2.HRMS2_EMPLOYEE_SALARY_DETAILS, TARGET HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_SALARY_DETAILS,
+COLMAP(USEDEFAULTS,,MIGRATION_FLAG = 'HRMS1');
+
+************************************************************************************************************************************************
+
+select EMPLOYEE_PAYBILL_DTLS_ID,EMPLOYEE_ID, migration_flag from HRMS2_EMPLOYEE_PAYBILL_DTLS
+where migration_flag like 'HRMS%';  
+
+EMPLOYEE_PAYBILL_DTLS_ID EMPLOYEE_ID MIGRATION_FLAG
+------------------------ ----------- --------------------
+                  356555             HRMS1
+                  356556             HRMS1
+                  356557             HRMS1
+			    11238099             HRMS2
+                11238100             HRMS2
+
+*************************************************************************************************************************************************
+
+SELECT EMPLOYEE_SALARY_DTL_ID,EMPLOYEE_ID, MIGRATION_FLAG FROM HRMS2_EMPLOYEE_SALARY_DETAILS  
+WHERE MIGRATION_FLAG LIKE 'HRMS%'
+
+EMPLOYEE_SALARY_DTL_ID EMPLOYEE_ID MIGRATION_FLAG
+---------------------- ----------- --------------------
+    
+                885099             HRMS1
+                885100             HRMS1
+				885114             HRMS1
+			  62159095   911239788 HRMS2
+              62159096   911239820 HRMS2
+
+**************************************************************************************************************************************************
+PRE-PROD (UAT) TO PROD
+========================
+EXTRACT :
+----------
+
+TABLE HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_SALARY_DETAILS, WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_PAYBILL_DTLS, WHERE (migration_flag = 'HRMS1');
+
+**************************************************************************************************************************************************
+
+MACRO
+#########
+
+$ pwd
+/u02/app/oracle/product/19.0.0/ogg_home
+
+[oracle@HRMS2-DB-PP01 ogg_home]$ cat add_exception.mac
+MACRO #add_exception
+BEGIN
+COLMAP (USEDEFAULTS,
+       OPERATION = @GETENV ('GGHEADER','OPTYPE'),
+       ERROR_CODE = @GETENV ('LASTERR', 'DBERRNUM'),
+       COMMIT_TIMESTAMP = @GETENV ('GGHEADER', 'COMMITTIMESTAMP'),
+       TIMESTAMP = @DATENOW ()
+);
+END;
+
+*****************************************************************************************************************************************************
+
+>> Replicat Param File
+-----------------------
+
+REPLICAT R3_T_PRD
+DBOPTIONS INTEGRATEDPARAMS(PARALLELISM 2)
+
+--Including Marco
+INCLUDE /u02/app/oracle/product/19.0.0/ogg_home/add_exception.mac
+
+MAP HRMS2PP.HRMS2PLUS.HRMS2_EMP_DISPLINARY_ACTION,TARGET  HRMS2PROD.HRMS2PLUS.HRMS2_EMP_DISPLINARY_ACTION,REPERROR(default,EXCEPTION);
+MAP HRMS2PP.HRMS2PLUS.HRMS2_EMP_DISPLINARY_ACTION,TARGET  HRMS2PROD.HRMS2PLUS.HRMS2_EMP_DISPLINARY_ACTION_ET,EXCEPTIONSONLY,INSERTALLRECORDS, #add_exception (); --FILTER ( @GETENV('TRANSACTION','CSN') > 91920906505);
+
+MAP HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_BASIC_DTLS,TARGET  HRMS2PROD.HRMS2PLUS.HRMS2_EMPLOYEE_BASIC_DTLS,REPERROR(default,EXCEPTION);
+MAP HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_BASIC_DTLS,TARGET  HRMS2PROD.HRMS2PLUS.HRMS2_EMPLOYEE_BASIC_DTLS_ET,EXCEPTIONSONLY,INSERTALLRECORDS, #add_exception (); --FILTER ( @GETENV('TRANSACTION','CSN') > 91975108106);
+
+*****************************************************************************************************************************************************
+
+EXCEPTION TABLES - DDL OF THE TABLE 
+####################################
+
+SET SERVEROUTPUT ON;
+DECLARE
+--  v_table_name    VARCHAR2(50) := 'EMP_TB';    -- Replace with your table name
+    v_owner         VARCHAR2(50) := 'HRMS2PLUS'; -- Replace with your schema/owner name
+    v_sql           CLOB;
+    v_column_list   CLOB;
+    v_data_type     VARCHAR2(100);
+    v_null          VARCHAR2(10);
+    v_tablespace    VARCHAR2(100);
+BEGIN
+    FOR x IN (SELECT table_name FROM dba_tables WHERE owner = v_owner AND TABLE_NAME IN 
+	('HRMS2_EMP_DISPLINARY_ACTION','HRMS2_EMPLOYEE_BASIC_DTLS') )  LOOP
+        --v_sql := 'CREATE TABLE ' || v_owner || '.' || regexp_replace(x.table_name, '_TB$', '')|| '_ET' || ' (' || chr(10);  ---not required
+        v_column_list := '';
+        v_sql := 'CREATE TABLE ' || v_owner || '.' ||x.table_name || '_ET' || ' (' || chr(10);
+        FOR rec IN (SELECT column_name,data_type ||
+                    CASE
+                        WHEN data_type IN ('VARCHAR2','CHAR') THEN '(' || data_length || ')'
+                        WHEN data_type IN ('NUMBER') THEN
+                            CASE
+                                WHEN data_precision IS NOT NULL AND data_scale IS NOT NULL THEN '('|| data_precision || ',' || data_scale || ')'
+                                WHEN data_precision IS NOT NULL THEN '(' || data_precision || ')'
+                            ELSE
+                                    ''
+                            END
+                        ELSE
+                            ''
+                    END
+                AS data_type,
+                nullable
+            FROM
+                dba_tab_columns
+            WHERE
+                table_name = upper(x.table_name)
+                AND owner = upper(v_owner)
+            ORDER BY
+                column_id
+        ) LOOP
+            v_null :=
+                CASE
+                    WHEN rec.nullable = 'N' THEN ' NOT NULL'
+                    ELSE ''
+                END;
+            v_column_list := v_column_list || '    ' || rec.column_name || ' ' || rec.data_type || v_null || ',' || chr(10);
+        END LOOP;
+        --SELECT default_tablespace INTO v_tablespace FROM dba_users WHERE username = v_owner;
+        select distinct tablespace_name into v_tablespace from dba_tables where table_name=x.table_name and owner=v_owner;
+        v_sql := v_sql || v_column_list;
+        v_sql := v_sql || '    OPERATION VARCHAR2(5),' || chr(10);
+        v_sql := v_sql || '    ERROR_CODE VARCHAR2(5),' || chr(10);
+        v_sql := v_sql || '    COMMIT_TIMESTAMP DATE,' || chr(10);
+        v_sql := v_sql || '    TIMESTAMP DATE' || chr(10);
+        v_sql := v_sql || ') tablespace EXT_TBS;';        ------------TBS NAME
+        dbms_output.put_line(v_sql);
+    END LOOP;
+END;
+/
+
+***************************************************************************************************************************************************\
+Passing some 'ESS2REQUEST' to the Target DB From the Source DB - Only for Insert Statements
+--------------------------------------------------------------------------------------------
+
+Source  : MS-SQL
+Target  : ORACLE (REQUESTED_BY) - This column is available only on Target DB.
+
+Some Sample Records on Target DB :
+-----------------------------------
+
+HRMS2ESS@HRMS2UAT >SELECT Employee_id, application_id, requested_by
+FROM T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION
+WHERE ROWNUM <= 5; 
+
+EMPLOYEE_ID APPLICATION_ID REQUESTED_BY
+----------- -------------- ------------
+  900667357          30876 HRMS2Migrate
+  900721435          30877 HRMS2Migrate
+  900554306          30878 HRMS2Migrate
+  900577415          30879 HRMS2Migrate
+  900777752          30880 HRMS2Migrate
+  
+=> Whenever a new Insert request is coming from MS-SQL to Oracle (Requested_by) column should be updated by ESSRequest.
+
+MAP DBO.T_EMPLOYEE_ADVANCE_DETAILS, TARGET HRMS2UAT.HRMS2ESS.T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION,
+COLMAP (USEDEFAULTS,
+remark_text=remark,loan_advance_type_id=request_type_id,emi_start_month=start_date,lastupdated_by=last_updated_by,lastupdated_date=last_updated_date,
+application_id=t_employee_advance_details_id,loan_advance_sub_type_id=advance_request_sub_type_id,REQUESTED_BY_TYPE_ID=@COLSTAT(MISSING),
+TRANSACTION_NUMBER=@COLSTAT(MISSING),IS_ACTIVE=@COLSTAT(MISSING),FILE_NO=@COLSTAT(MISSING),IS_DRAFT=@COLSTAT(MISSING),FILE_ID=@COLSTAT(MISSING),
+KGID_NO=@COLSTAT(MISSING),STAGE_ID=@COLSTAT(MISSING),IS_ORDER_GENERATED=@COLSTAT(MISSING),ORDER_GENERATED_DATE=@COLSTAT(MISSING),
+DDO_STATUS=@COLSTAT(MISSING),WORKFLOW_REMARK_TEXT=@COLSTAT(MISSING),PAYBILL_ID=@COLSTAT(MISSING),RECV_NO=@COLSTAT(MISSING),
+IS_REQUESTED_AMOUNT=@COLSTAT(MISSING),PAYBILL_GENERATED=@COLSTAT(MISSING),
+REQUESTED_BY = @CASE( @GETENV ('GGHEADER','OPTYPE'), 'INSERT', 'ESSRequest', @COLSTAT (MISSING))),KEYCOLS(APPLICATION_ID);
+
+HRMS2ESS@HRMS2UAT >SELECT Employee_id, application_id, requested_by
+FROM T_EMPLOYEE_LOAN_AND_ADVANCE_APPLICATION
+WHERE ROWNUM <= 5; 
+
+EMPLOYEE_ID APPLICATION_ID REQUESTED_BY
+----------- -------------- ------------
+  900667357          30876 HRMS2Migrate
+  900721435          30877 HRMS2Migrate
+  900554306          30878 HRMS2Migrate
+  900577415          30879 HRMS2Migrate
+  900777752          30880 HRMS2Migrate
+  900025797          30881 ESSRequest   ----->  For New Insert Via GoldenGate from Source DB to Target DB.
+                                                not for update and delete records.
+  
+***************************************************************************************************************************************************\
+
+Requested_by column Value updated by Via Stored Procedures : 
+-------------------------------------------------------------
+
+
+
+
+
+
+
+
+***************************************************************************************************************************************************
+
+Exception Tables for discarded records
+---------------------------------------
