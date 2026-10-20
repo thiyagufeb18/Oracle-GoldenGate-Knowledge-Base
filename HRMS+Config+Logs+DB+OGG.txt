@@ -1,0 +1,684 @@
+SQL> show pdbs;
+
+    CON_ID CON_NAME                       OPEN MODE  RESTRICTED
+---------- ------------------------------ ---------- ----------
+         2 PDB$SEED                       READ ONLY  NO
+         8 HRMS2PROD                      READ WRITE NO
+         9 ORGPROD                        READ WRITE NO
+        10 WMSPROD                        READ WRITE NO
+        11 DMSPROD                        READ WRITE NO
+        12 UMSPROD                        READ WRITE NO
+
+SQL> show con_name
+
+CON_NAME
+------------------------------
+CDB$ROOT
+
+SQL> create tablespace ggadmin_tbs datafile '+DATA' size 100M AUTOEXTEND ON NEXT 100M MAXSIZE 5G;
+Tablespace created.
+
+SQL> alter session set container=HRMS2PROD;
+Session altered.
+
+SQL> create tablespace ggadmin_tbs datafile '+DATA' size 100M AUTOEXTEND ON NEXT 100M MAXSIZE 5G;
+Tablespace created.
+
+SQL> alter session set container=ORGPROD;
+Session altered.
+
+SQL> create tablespace ggadmin_tbs datafile '+DATA' size 100M AUTOEXTEND ON NEXT 100M MAXSIZE 5G;
+Tablespace created.
+
+SQL> alter session set container=WMSPROD;
+Session altered.
+
+SQL> create tablespace ggadmin_tbs datafile '+DATA' size 100M AUTOEXTEND ON NEXT 100M MAXSIZE 5G;
+Tablespace created.
+
+SQL> alter session set container=DMSPROD;
+Session altered.
+
+SQL> create tablespace ggadmin_tbs datafile '+DATA' size 100M AUTOEXTEND ON NEXT 100M MAXSIZE 5G;
+Tablespace created.
+
+SQL> alter session set container=UMSPROD;
+Session altered.
+
+SQL> create tablespace ggadmin_tbs datafile '+DATA' size 100M AUTOEXTEND ON NEXT 100M MAXSIZE 5G;
+Tablespace created.
+
+SQL> show parameter enable_goldengate_replication;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+enable_goldengate_replication        boolean     TRUE
+
+
+SQL> grant connect, create session, resource to c##ggadmin;
+Grant succeeded.
+
+SQL> grant DBA to C##GGADMIN container=all;
+Grant succeeded.
+
+SQL> grant execute on dbms_lock to c##ggadmin;
+Grant succeeded.
+
+SQL> grant create view to c##ggadmin;
+Grant succeeded.
+
+SQL> grant select any dictionary to c##ggadmin;
+Grant succeeded.
+
+SQL> grant connect, resource to c##ggadmin;
+Grant succeeded.
+
+
+SQL> select SUPPLEMENTAL_LOG_DATA_MIN,SUPPLEMENTAL_LOG_DATA_PK,SUPPLEMENTAL_LOG_DATA_UI,SUPPLEMENTAL_LOG_DATA_FK,
+     SUPPLEMENTAL_LOG_DATA_ALL from v$database;   
+
+SUPPLEME SUP SUP SUP SUP
+-------- --- --- --- ---
+NO       NO  NO  NO  NO
+
+SQL> ALTER DATABASE FORCE LOGGING;
+Database altered.
+
+SQL> SELECT FORCE_LOGGING FROM V$DATABASE;
+
+FORCE_LOGGING
+---------------------------------------
+YES
+
+SQL> alter database add supplemental log data (all) columns;
+Database altered.
+
+SQL> select SUPPLEMENTAL_LOG_DATA_MIN,SUPPLEMENTAL_LOG_DATA_PK,SUPPLEMENTAL_LOG_DATA_UI,SUPPLEMENTAL_LOG_DATA_FK,SUPPLEMENTAL_LOG_DATA_ALL
+from v$database;   
+
+SUPPLEME SUP SUP SUP SUP
+-------- --- --- --- ---
+IMPLICIT NO  NO  NO  YES
+
+SQL> alter database add supplemental log data;
+Database altered.
+
+SQL> select SUPPLEMENTAL_LOG_DATA_MIN,SUPPLEMENTAL_LOG_DATA_PK,SUPPLEMENTAL_LOG_DATA_UI,SUPPLEMENTAL_LOG_DATA_FK,SUPPLEMENTAL_LOG_DATA_ALL from v$database;
+
+SUPPLEME SUP SUP SUP SUP
+-------- --- --- --- ---
+YES      NO  NO  NO  YES
+
+SQL> grant connect, create session, resource to c##ggadmin;
+Grant succeeded.
+
+SQL> select supplemental_log_data_min, force_logging from v$database;
+
+SUPPLEME FORCE_LOGGING
+-------- ---------------------------------------
+YES      YES
+
+SQL> alter user c##ggadmin set container_data=all container=current;
+User altered.
+
+SQL> grant alter any table to c##ggadmin container=ALL;
+Grant succeeded.
+
+SQL> exec DBMS_GOLDENGATE_AUTH.GRANT_ADMIN_PRIVILEGE (grantee=>'C##GGADMIN', privilege_type=>'capture',grant_select_privileges=>true, do_grants=>TRUE);
+PL/SQL procedure successfully completed.
+
+
+SQL> show pdbs;
+
+    CON_ID CON_NAME                       OPEN MODE  RESTRICTED
+---------- ------------------------------ ---------- ----------
+         2 PDB$SEED                       READ ONLY  NO
+         8 HRMS2PROD                      READ WRITE NO
+         9 ORGPROD                        READ WRITE NO
+        10 WMSPROD                        READ WRITE NO
+        11 DMSPROD                        READ WRITE NO
+        12 UMSPROD                        READ WRITE NO
+
+
+SQL> ALTER PLUGGABLE DATABASE ALL CLOSE immediate instances=all;
+Pluggable database altered.
+
+
+SQL> show pdbs;
+
+    CON_ID CON_NAME                       OPEN MODE  RESTRICTED
+---------- ------------------------------ ---------- ----------
+         2 PDB$SEED                       READ ONLY  NO
+         8 HRMS2PROD                      MOUNTED
+         9 ORGPROD                        MOUNTED
+        10 WMSPROD                        MOUNTED
+        11 DMSPROD                        MOUNTED
+        12 UMSPROD                        MOUNTED
+
+SQL> show parameter sga;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+allow_group_access_to_sga            boolean     FALSE
+lock_sga                             boolean     FALSE
+pre_page_sga                         boolean     TRUE
+sga_max_size                         big integer 120G
+sga_min_size                         big integer 0
+sga_target                           big integer 120G
+unified_audit_sga_queue_size         integer     1048576
+
+
+SQL> show parameter streams
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+streams_pool_size                    big integer 0
+
+
+SQL> alter system set streams_pool_size=10G scope=spfile sid='*';
+System altered.
+
+
+SQL> show parameter streams
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+streams_pool_size                    big integer 0
+
+
+SQL> show parameter spfile;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+spfile                               string      +DATA/HRMS2PRD/PARAMETERFILE/spfile.272.1168435753
+
+
+[oracle@HRMS2-DB-PP02 dbs]$ srvctl stop database -d HRMS2PRD
+[oracle@HRMS2-DB-PP02 dbs]$ srvctl start database -d HRMS2PRD
+[oracle@HRMS2-DB-PP02 dbs]$ srvctl status database -d HRMS2PRD
+Instance hrms2prd1 is running on node hrms2-db-pp01
+Instance hrms2prd2 is running on node hrms2-db-pp02
+
+SQL> ALTER PLUGGABLE DATABASE ALL OPEN instances=all;
+Pluggable database altered.
+
+
+SQL> show pdbs;
+
+    CON_ID CON_NAME                       OPEN MODE  RESTRICTED
+---------- ------------------------------ ---------- ----------
+         2 PDB$SEED                       READ ONLY  NO
+         8 HRMS2PROD                      READ WRITE NO
+         9 ORGPROD                        READ WRITE NO
+        10 WMSPROD                        READ WRITE NO
+        11 DMSPROD                        READ WRITE NO
+        12 UMSPROD                        READ WRITE NO
+
+
+SET SERVEROUTPUT ON 
+BEGIN FOR c IN (SELECT table_name, constraint_name FROM user_constraints WHERE constraint_type = 'R') 
+-- 'R' stands for Referential (Foreign Key) 
+LOOP EXECUTE IMMEDIATE 'ALTER TABLE ' || c.table_name || ' DISABLE CONSTRAINT ' || c.constraint_name; 
+END LOOP; 
+END;
+
+
+SELECT constraint_name, table_name, status
+FROM all_constraints
+WHERE constraint_type = 'R' AND owner = 'HRMS2PLUS';
+
+
+
+SQL> SELECT constraint_name, table_name, status
+FROM all_constraints
+WHERE constraint_type = 'R'
+  AND owner = 'HRMS2PLUS'
+  AND status = 'ENABLED';
+  
+no rows selected
+
+
+SQL> BEGIN
+   FOR t IN (SELECT trigger_name, owner
+             FROM all_triggers
+ WHERE owner = 'HRMS2PLUS') -- Replace with your schema name
+   LOOP
+      EXECUTE IMMEDIATE 'ALTER TRIGGER ' || t.owner || '.' || t.trigger_name || ' DISABLE';
+   END LOOP;
+END;
+ /
+
+PL/SQL procedure successfully completed.
+
+
+
+]$ ggsci
+
+Oracle GoldenGate Command Interpreter for Oracle
+Version 21.15.0.0.1 OGGCORE_21.15.0.0.0OGGRU_PLATFORMS_240724.0842_FBO
+Oracle Linux 7, x64, 64bit (optimized), Oracle Database 21c and lower supported versions on Jul 24 2024 13:56:50
+Operating system character set identified as UTF-8.
+
+Copyright (C) 1995, 2024, Oracle and/or its affiliates. All rights reserved.
+
+
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in) 1> info all
+
+Program     Status      Group       Lag at Chkpt  Time Since Chkpt
+
+MANAGER     STOPPED
+
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in) 2> start mgr
+Manager started.
+
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in) 3> info all
+
+Program     Status      Group       Lag at Chkpt  Time Since Chkpt
+
+MANAGER     RUNNING
+
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in) 4> info all
+
+Program     Status      Group       Lag at Chkpt  Time Since Chkpt
+
+MANAGER     RUNNING
+
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in) 5> info credentialstore
+
+Reading from credential store:
+
+Error: Unable to open credential store.
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in) 6> DBLogin USerID c##ggadmin@HRMS2PROD password c##ggadmin
+Successfully logged into database HRMS2PROD.
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in as c##ggadmin@hrms2prd1) 7> ADD CREDENTIALSTORE
+
+Credential store created.
+
+[oracle@HRMS2-DB-PP01 ogg_home]$ cd dircrd
+[oracle@HRMS2-DB-PP01 dircrd]$ ls -lrt
+total 0
+[oracle@HRMS2-DB-PP01 dircrd]$ ls -lrt
+total 8
+-rw-r----- 1 oracle oinstall  72 Nov 24 01:12 ewallet.pf
+-rw-r----- 1 oracle oinstall 303 Nov 24 01:12 ewallet.p12
+
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in as c##ggadmin@hrms2prd1) 8> alter credentialstore add user c##ggadmin@HRMS2PROD, password c##ggadmin ALIAS C##GGADMIN_HRMS2PROD
+
+Credential store altered.
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in as c##ggadmin@hrms2prd1) 9> info credentialstore
+
+Reading from credential store:
+
+Default domain: OracleGoldenGate
+
+  Alias: C##GGADMIN_HRMS2PROD
+  Userid: c##ggadmin@HRMS2PROD
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in as c##ggadmin@hrms2prd1) 10> exit
+[oracle@HRMS2-DB-PP01 ogg_home]$ ggsci
+
+Oracle GoldenGate Command Interpreter for Oracle
+Version 21.15.0.0.1 OGGCORE_21.15.0.0.0OGGRU_PLATFORMS_240724.0842_FBO
+Oracle Linux 7, x64, 64bit (optimized), Oracle Database 21c and lower supported versions on Jul 24 2024 13:56:50
+Operating system character set identified as UTF-8.
+
+Copyright (C) 1995, 2024, Oracle and/or its affiliates. All rights reserved.
+
+
+
+GGSCI (HRMS2-DB-PP01.infra.karnataka.gov.in) 1> DBLogin USerIDAlias C##GGADMIN_HRMS2PROD
+Successfully logged into database HRMS2PROD.
+
+
+
+
+
+register EXTRACT E4_T_PRD  database container (hrms2pp)
+add EXTRACT E4_T_PRD integrated tranlog begin now
+add exttrail /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/trans2/tr, extract E4_T_PRD
+add EXTRACT P4_T_PRD exttrailsource /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/trans2/tr
+add rmttrail /u02/app/oracle/product/19.0.0/ogg_home/dirdat/oracle/production/trans2/tr extract P4_T_PRD
+
+
+logs
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 7>
+register EXTRACT E1_M_PRD database container (hrms2pp)
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 7>
+
+2024-11-24 09:55:50  INFO    OGG-02003  Extract group E1_M_PRD successfully registered with database at SCN 91790500329.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 8> add EXTRACT E1_M_PRD integrated tranlog begin now
+Integrated Extract added.
+
+*******************************************************************
+error -- check once 
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 9> add exttrail /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/master/ms, extract MS_E1_PP
+Extract group MS_E1_PP is running, cannot be altered.
+
+*********************************************************
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 10> add exttrail /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/master/ms, extract E1_M_PRD
+EXTTRAIL added.
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 12> add EXTRACT P1_M_PRD exttrailsource /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/master/ms
+Extract added.
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 13> add rmttrail /u02/app/oracle/product/19.0.0/ogg_home/dirdat/oracle/production/master/ms extract P1_M_PRD
+RMTTRAIL added.
+
+
+
+
+
+EXTRACT E1_M_PRD
+SETENV(ORACLE_HOME="/u02/app/oracle/product/19.0.0/dbhome_1")
+SETENV(LD_LIBRARY_PATH="/u02/app/oracle/product/19.0.0/dbhome_1/lib:/lib:/usr/lib")
+SETENV(TNS_ADMIN = "/u02/app/oracle/product/19.0.0/dbhome_1/network/admin")
+USERIDALIAS HMRS2PLUS_SOURCE_PP
+TRANLOGOPTIONS INTEGRATEDPARAMS (MAX_SGA_SIZE 100)
+EXTTRAIL /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/master/ms
+--Master Tables (SCN - 
+TABLE HRMS2PP.HRMS2PLUS.REF_ADDRESS, WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_BANK,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_BANK_BRANCH_DETAILS, WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_BANK_PAYMENTMODE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_CADRE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_CITY_GRADES,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_COUNTRY,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_DDO,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_DEPARTMENT,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_DEPARTMENT_EXAM_SESSION,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_DISTRICT,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_EMPLOYEE_RELATIONTYPE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_EMPLOYEE_SERVICE_STATUS,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_EMPLOYEE_STATUS,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_EMPLOYMENT_TYPE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_GENDER,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_GRADE_PAY,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_GROUP,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_HOA,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_INSURANCE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_LEAVE_TYPE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_NOTIFICATION_TYPE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_OFFICES_LEVEL,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_PAYBILL_DTLS,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_PHYSICALLY_CHALLENGED,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_POST,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_POST_CODE_DETAILS,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_PROMOTION_TYPE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_QUALIFICATION,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_QUALIFICATION_TYPE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_QUARTER_DETAILS,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_REVIEW_RATING,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_SALUTATION,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_SERVICE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_STATE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_SUSPENSION_EVENT_TYPE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_SUSPENSION_PRD_TREATED_AS,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_SUSPENSION_TYPE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_TALUK,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_TYPEOF_EMPLOYMENT,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_UNIT,WHERE (migration_flag = 'HRMS1');
+
+--------------------------------------------------------------------------------------
+
+
+EXTRACT P1_M_PRD
+SETENV(ORACLE_HOME="/u02/app/oracle/product/19.0.0/dbhome_1")
+SETENV(LD_LIBRARY_PATH="/u02/app/oracle/product/19.0.0/dbhome_1/lib:/lib:/usr/lib")
+SETENV(TNS_ADMIN = "/u02/app/oracle/product/19.0.0/dbhome_1/network/admin")
+USERIDALIAS HMRS2PLUS_SOURCE_PP
+RMTHOST 172.31.20.111, MGRPORT 7809
+RMTTRAIL /u02/app/oracle/product/19.0.0/ogg_home/dirdat/oracle/production/master/ms
+PASSTHRU
+TABLE HRMS2PP.HRMS2PLUS.REF_ADDRESS;
+TABLE HRMS2PP.HRMS2PLUS.REF_BANK;
+TABLE HRMS2PP.HRMS2PLUS.REF_BANK_BRANCH_DETAILS;
+TABLE HRMS2PP.HRMS2PLUS.REF_BANK_PAYMENTMODE;
+TABLE HRMS2PP.HRMS2PLUS.REF_CADRE;
+TABLE HRMS2PP.HRMS2PLUS.REF_CITY_GRADES;
+TABLE HRMS2PP.HRMS2PLUS.REF_COUNTRY;
+TABLE HRMS2PP.HRMS2PLUS.REF_DDO;
+TABLE HRMS2PP.HRMS2PLUS.REF_DEPARTMENT;
+TABLE HRMS2PP.HRMS2PLUS.REF_DEPARTMENT_EXAM_SESSION;
+TABLE HRMS2PP.HRMS2PLUS.REF_DISTRICT;
+TABLE HRMS2PP.HRMS2PLUS.REF_EMPLOYEE_RELATIONTYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_EMPLOYEE_SERVICE_STATUS;
+TABLE HRMS2PP.HRMS2PLUS.REF_EMPLOYEE_STATUS;
+TABLE HRMS2PP.HRMS2PLUS.REF_EMPLOYMENT_TYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_GENDER;
+TABLE HRMS2PP.HRMS2PLUS.REF_GRADE_PAY;
+TABLE HRMS2PP.HRMS2PLUS.REF_GROUP;
+TABLE HRMS2PP.HRMS2PLUS.REF_HOA;
+TABLE HRMS2PP.HRMS2PLUS.REF_INSURANCE;
+TABLE HRMS2PP.HRMS2PLUS.REF_LEAVE_TYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_NOTIFICATION_TYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_OFFICES_LEVEL;
+TABLE HRMS2PP.HRMS2PLUS.REF_PAYBILL_DTLS;
+TABLE HRMS2PP.HRMS2PLUS.REF_PHYSICALLY_CHALLENGED;
+TABLE HRMS2PP.HRMS2PLUS.REF_POST;
+TABLE HRMS2PP.HRMS2PLUS.REF_POST_CODE_DETAILS;
+TABLE HRMS2PP.HRMS2PLUS.REF_PROMOTION_TYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_QUALIFICATION;
+TABLE HRMS2PP.HRMS2PLUS.REF_QUALIFICATION_TYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_QUARTER_DETAILS;
+TABLE HRMS2PP.HRMS2PLUS.REF_REVIEW_RATING;
+TABLE HRMS2PP.HRMS2PLUS.REF_SALUTATION;
+TABLE HRMS2PP.HRMS2PLUS.REF_SERVICE;
+TABLE HRMS2PP.HRMS2PLUS.REF_STATE;
+TABLE HRMS2PP.HRMS2PLUS.REF_SUSPENSION_EVENT_TYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_SUSPENSION_PRD_TREATED_AS;
+TABLE HRMS2PP.HRMS2PLUS.REF_SUSPENSION_TYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_TALUK;
+TABLE HRMS2PP.HRMS2PLUS.REF_TYPEOF_EMPLOYMENT;
+TABLE HRMS2PP.HRMS2PLUS.REF_UNIT;
+TABLE HRMS2PP.HRMS2PLUS.REF_MODULE;
+TABLE HRMS2PP.HRMS2PLUS.REF_ADVANCE_TYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_RECOVERY_TYPE;
+TABLE HRMS2PP.HRMS2PLUS.REF_RECOVERY_DETAILS;
+TABLE HRMS2PP.HRMS2PLUS.M_ACTIVITY;
+TABLE HRMS2PP.HRMS2PLUS.T_EMPLOYEE_SALARY;
+
+TABLE HRMS2PP.HRMS2PLUS.REF_VILLAGE;
+TABLE HRMS2PP.HRMS2PLUS.REF_OFFICES;
+TABLE HRMS2PP.HRMS2PLUS.REF_ESTABLISHMENT;
+TABLE HRMS2PP.HRMS2PLUS.REF_PAYSCALE_STRUCTURE;
+
+
+
+add replicat R1_M_PRD Integrated EXTTRAIL /u02/app/oracle/product/19.0.0/ogg_home/dirdat/oracle/production/master/ms 
+
+
+REPLICAT R1_M_PRD
+SETENV(ORACLE_HOME="/u02/app/oracle/product/19.0.0/dbhome_1")
+SETENV(LD_LIBRARY_PATH="/u02/app/oracle/product/19.0.0/dbhome_1/lib:/lib:/usr/lib")
+SETENV(TNS_ADMIN = "/u02/app/oracle/product/19.0.0/dbhome_1/network/admin")
+USERIDALIAS C##GGADMIN_HRMS2PROD
+--DBOPTIONS INTEGRATEDPARAMS(PARALLELISM 2)
+DISCARDFILE ./dirrpt/r1_m_prd.dsc, PURGE, MEGABYTES 4096
+ASSUMETARGETDEFS
+-------
+MAP HRMS2PP.HRMS2PLUS.REF_ADDRESS, TARGET HRMS2PROD.HRMS2PLUS.REF_ADDRESS;
+MAP HRMS2PP.HRMS2PLUS.REF_BANK, TARGET HRMS2PROD.HRMS2PLUS.REF_BANK;
+MAP HRMS2PP.HRMS2PLUS.REF_BANK_BRANCH_DETAILS,TARGET HRMS2PROD.HRMS2PLUS.REF_BANK_BRANCH_DETAILS;
+MAP HRMS2PP.HRMS2PLUS.REF_BANK_PAYMENTMODE, TARGET HRMS2PROD.HRMS2PLUS.REF_BANK_PAYMENTMODE;
+MAP HRMS2PP.HRMS2PLUS.REF_CADRE, TARGET HRMS2PROD.HRMS2PLUS.REF_CADRE;
+MAP HRMS2PP.HRMS2PLUS.REF_CITY_GRADES, TARGET HRMS2PROD.HRMS2PLUS.REF_CITY_GRADES;
+MAP HRMS2PP.HRMS2PLUS.REF_COUNTRY, TARGET HRMS2PROD.HRMS2PLUS.REF_COUNTRY;
+MAP HRMS2PP.HRMS2PLUS.REF_DDO, TARGET HRMS2PROD.HRMS2PLUS.REF_DDO;
+MAP HRMS2PP.HRMS2PLUS.REF_DEPARTMENT, TARGET HRMS2PROD.HRMS2PLUS.REF_DEPARTMENT;
+MAP HRMS2PP.HRMS2PLUS.REF_DEPARTMENT_EXAM_SESSION, TARGET HRMS2PROD.HRMS2PLUS.REF_DEPARTMENT_EXAM_SESSION;
+MAP HRMS2PP.HRMS2PLUS.REF_DISTRICT, TARGET HRMS2PROD.HRMS2PLUS.REF_DISTRICT;
+MAP HRMS2PP.HRMS2PLUS.REF_EMPLOYEE_RELATIONTYPE, TARGET HRMS2PROD.HRMS2PLUS.REF_EMPLOYEE_RELATIONTYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_EMPLOYEE_SERVICE_STATUS, TARGET HRMS2PROD.HRMS2PLUS.REF_EMPLOYEE_SERVICE_STATUS;
+MAP HRMS2PP.HRMS2PLUS.REF_EMPLOYEE_STATUS,TARGET HRMS2PROD.HRMS2PLUS.REF_EMPLOYEE_STATUS;
+MAP HRMS2PP.HRMS2PLUS.REF_EMPLOYMENT_TYPE,TARGET HRMS2PROD.HRMS2PLUS.REF_EMPLOYMENT_TYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_GENDER, TARGET HRMS2PROD.HRMS2PLUS.REF_GENDER;
+MAP HRMS2PP.HRMS2PLUS.REF_GRADE_PAY, TARGET HRMS2PROD.HRMS2PLUS.REF_GRADE_PAY;
+MAP HRMS2PP.HRMS2PLUS.REF_GROUP, TARGET HRMS2PROD.HRMS2PLUS.REF_GROUP;
+MAP HRMS2PP.HRMS2PLUS.REF_HOA, TARGET HRMS2PROD.HRMS2PLUS.REF_HOA;
+MAP HRMS2PP.HRMS2PLUS.REF_INSURANCE, TARGET HRMS2PROD.HRMS2PLUS.REF_INSURANCE;
+MAP HRMS2PP.HRMS2PLUS.REF_LEAVE_TYPE, TARGET HRMS2PROD.HRMS2PLUS.REF_LEAVE_TYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_NOTIFICATION_TYPE, TARGET HRMS2PROD.HRMS2PLUS.REF_NOTIFICATION_TYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_OFFICES_LEVEL,TARGET HRMS2PROD.HRMS2PLUS.REF_OFFICES_LEVEL;
+MAP HRMS2PP.HRMS2PLUS.REF_PAYBILL_DTLS,TARGET HRMS2PROD.HRMS2PLUS.REF_PAYBILL_DTLS;
+MAP HRMS2PP.HRMS2PLUS.REF_PHYSICALLY_CHALLENGED, TARGET HRMS2PROD.HRMS2PLUS.REF_PHYSICALLY_CHALLENGED;
+MAP HRMS2PP.HRMS2PLUS.REF_POST,TARGET HRMS2PROD.HRMS2PLUS.REF_POST;
+MAP HRMS2PP.HRMS2PLUS.REF_POST_CODE_DETAILS,TARGET HRMS2PROD.HRMS2PLUS.REF_POST_CODE_DETAILS;
+MAP HRMS2PP.HRMS2PLUS.REF_PROMOTION_TYPE,TARGET HRMS2PROD.HRMS2PLUS.REF_PROMOTION_TYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_QUALIFICATION, TARGET HRMS2PROD.HRMS2PLUS.REF_QUALIFICATION;
+MAP HRMS2PP.HRMS2PLUS.REF_QUALIFICATION_TYPE,TARGET HRMS2PROD.HRMS2PLUS.REF_QUALIFICATION_TYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_QUARTER_DETAILS,TARGET HRMS2PROD.HRMS2PLUS.REF_QUARTER_DETAILS;
+MAP HRMS2PP.HRMS2PLUS.REF_REVIEW_RATING, TARGET HRMS2PROD.HRMS2PLUS.REF_REVIEW_RATING;
+MAP HRMS2PP.HRMS2PLUS.REF_SALUTATION, TARGET HRMS2PROD.HRMS2PLUS.REF_SALUTATION;
+MAP HRMS2PP.HRMS2PLUS.REF_STATE, TARGET HRMS2PROD.HRMS2PLUS.REF_STATE;
+MAP HRMS2PP.HRMS2PLUS.REF_SUSPENSION_EVENT_TYPE,TARGET HRMS2PROD.HRMS2PLUS.REF_SUSPENSION_EVENT_TYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_SUSPENSION_PRD_TREATED_AS,TARGET HRMS2PROD.HRMS2PLUS.REF_SUSPENSION_PRD_TREATED_AS;
+MAP HRMS2PP.HRMS2PLUS.REF_SUSPENSION_TYPE, TARGET HRMS2PROD.HRMS2PLUS.REF_SUSPENSION_TYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_TALUK, TARGET HRMS2PROD.HRMS2PLUS.REF_TALUK;
+MAP HRMS2PP.HRMS2PLUS.REF_TYPEOF_EMPLOYMENT, TARGET HRMS2PROD.HRMS2PLUS.REF_TYPEOF_EMPLOYMENT;
+--MAP HRMS2PP.HRMS2PLUS.REF_SERVICE, TARGET HRMS2PROD.HRMS2PLUS.REF_SERVICE;
+--MAP HRMS2PP.HRMS2PLUS.REF_UNIT, TARGET HRMS2PROD.HRMS2PLUS.REF_UNIT;
+--MAP HRMS2PP.HRMS2PLUS.REF_VILLAGE, TARGET HRMS2PROD.HRMS2PLUS.REF_VILLAGE;
+--MAP HRMS2PP.HRMS2PLUS.REF_OFFICES, TARGET HRMS2PROD.HRMS2PLUS.REF_OFFICES;
+--MAP HRMS2PP.HRMS2PLUS.REF_ESTABLISHMENT, TARGET HRMS2PROD.HRMS2PLUS.REF_ESTABLISHMENT;
+--MAP HRMS2PP.HRMS2PLUS.REF_PAYSCALE_STRUCTURE, TARGET HRMS2PROD.HRMS2PLUS.REF_PAYSCALE_STRUCTURE;
+MAP HRMS2PP.HRMS2PLUS.REF_MODULE, TARGET HRMS2PROD.HRMS2PLUS.REF_MODULE;
+MAP HRMS2PP.HRMS2PLUS.REF_ADVANCE_TYPE, TARGET HRMS2PROD.HRMS2PLUS.REF_ADVANCE_TYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_RECOVERY_TYPE, TARGET HRMS2PROD.HRMS2PLUS.REF_RECOVERY_TYPE;
+MAP HRMS2PP.HRMS2PLUS.REF_RECOVERY_DETAILS, TARGET HRMS2PROD.HRMS2PLUS.REF_RECOVERY_DETAILS;
+MAP HRMS2PP.HRMS2PLUS.M_ACTIVITY, TARGET HRMS2PROD.HRMS2PLUS.M_ACTIVITY;
+MAP HRMS2PP.HRMS2PLUS.T_EMPLOYEE_SALARY, TARGET HRMS2PROD.HRMS2PLUS.T_EMPLOYEE_SALARY;
+
+
+
+REPLICAT R_MS1_PP
+SETENV(ORACLE_HOME="/u02/app/oracle/product/19.0.0/dbhome_1")
+SETENV(LD_LIBRARY_PATH="/u02/app/oracle/product/19.0.0/dbhome_1/lib:/lib:/usr/lib")
+SETENV(TNS_ADMIN = "/u02/app/oracle/product/19.0.0/dbhome_1/network/admin")
+USERIDALIAS GG_HRMS2PLUS_TARGET_PREPROD
+DBOPTIONS INTEGRATEDPARAMS(parallelism 2)
+DISCARDFILE ./dirrpt/r_ms1.dsc, purge, megabytes 4096
+ASSUMETARGETDEFS
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 3> register EXTRACT E2_M_PRD database container (hrms2pp)
+
+2024-11-24 12:19:39  INFO    OGG-02003  Extract group E2_M_PRD successfully registered with database at SCN 91790803083.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 4> add EXTRACT E2_M_PRD integrated tranlog begin now
+Integrated Extract added.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 5> add exttrail /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/master2/ms, extract E2_M_PRD
+EXTTRAIL added.
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 6> add EXTRACT P2_M_PRD exttrailsource /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/master2/ms
+Extract added.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 7> add rmttrail /u02/app/oracle/product/19.0.0/ogg_home/dirdat/oracle/production/master2/ms extract P2_M_PRD
+RMTTRAIL added.
+
+-------------
+
+
+EXTRACT E2_M_PRD
+SETENV(ORACLE_HOME="/u02/app/oracle/product/19.0.0/dbhome_1")
+SETENV(LD_LIBRARY_PATH="/u02/app/oracle/product/19.0.0/dbhome_1/lib:/lib:/usr/lib")
+SETENV(TNS_ADMIN = "/u02/app/oracle/product/19.0.0/dbhome_1/network/admin")
+USERIDALIAS HMRS2PLUS_SOURCE_PP
+TRANLOGOPTIONS INTEGRATEDPARAMS (MAX_SGA_SIZE 100)
+EXTTRAIL /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/master2/ms
+--Master Tables (SCN -
+TABLE HRMS2PP.HRMS2PLUS.REF_OFFICES,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_VILLAGE,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_ESTABLISHMENT,WHERE (migration_flag = 'HRMS1');
+TABLE HRMS2PP.HRMS2PLUS.REF_PAYSCALE_STRUCTURE,WHERE (migration_flag = 'HRMS1');
+
+
+
+
+
+EXTRACT P2_M_PRD
+SETENV(ORACLE_HOME="/u02/app/oracle/product/19.0.0/dbhome_1")
+SETENV(LD_LIBRARY_PATH="/u02/app/oracle/product/19.0.0/dbhome_1/lib:/lib:/usr/lib")
+SETENV(TNS_ADMIN = "/u02/app/oracle/product/19.0.0/dbhome_1/network/admin")
+USERIDALIAS HMRS2PLUS_SOURCE_PP
+RMTHOST 172.31.20.111, MGRPORT 7809
+RMTTRAIL /u02/app/oracle/product/19.0.0/ogg_home/dirdat/oracle/production/master2/ms
+PASSTHRU
+TABLE HRMS2PP.HRMS2PLUS.REF_OFFICES;
+TABLE HRMS2PP.HRMS2PLUS.REF_VILLAGE;
+TABLE HRMS2PP.HRMS2PLUS.REF_ESTABLISHMENT;
+TABLE HRMS2PP.HRMS2PLUS.REF_PAYSCALE_STRUCTURE;
+
+>> Trans Logs
+
+GGSCI (HRMS2-DB-PP03) 3> DBLogin USerIDAlias HMRS2PLUS_SOURCE_PP
+Successfully logged into database CDB$ROOT.
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 4> register EXTRACT E3_T_PRD  database container (hrms2pp)
+
+2024-11-24 14:13:04  INFO    OGG-02003  Extract group E3_T_PRD successfully registered with database at SCN 91790973372.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 5> add EXTRACT E3_T_PRD integrated tranlog begin now
+Integrated Extract added.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 6> add exttrail /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/trans/tr, extract E3_T_PRD
+EXTTRAIL added.
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 7> add EXTRACT P3_T_PRD exttrailsource /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/trans/tr
+Extract added.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 8> add rmttrail /u02/app/oracle/product/19.0.0/ogg_home/dirdat/oracle/production/trans/tr extract P3_T_PRD
+RMTTRAIL added.
+
+>>>>>>>>> Logs trans 2 
+
+GGSCI (HRMS2-DB-PP03) 2> DBlogin USerIDAlias HMRS2PLUS_SOURCE_PP
+Successfully logged into database CDB$ROOT.
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 3> register EXTRACT E4_T_PRD  database container (hrms2pp)
+
+2024-11-24 15:27:13  INFO    OGG-02003  Extract group E4_T_PRD successfully registered with database at SCN 91791098954.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 4> add EXTRACT E4_T_PRD integrated tranlog begin now
+Integrated Extract added.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 5> add exttrail /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/trans2/tr, extract E4_T_PRD
+EXTTRAIL added.
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 6> add EXTRACT P4_T_PRD exttrailsource /u02/app/oracle/product/19.0.0/ogg_source/dirdat/oracle/production/trans2/tr
+Extract added.
+
+
+GGSCI (HRMS2-DB-PP03 as C##GGADMIN@hrms2pre/CDB$ROOT) 7> add rmttrail /u02/app/oracle/product/19.0.0/ogg_home/dirdat/oracle/production/trans2/tr extract P4_T_PRD
+RMTTRAIL added.
+
+===
+
+
+--TABLE HRMS2PP.HRMS2PLUS.HRMS2_EMP_ATTENDANCE_REGISTER, WHERE (migration_flag = 'HRMS1');
+--TABLE HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_SALARY_DETAILS, WHERE (migration_flag = 'HRMS1');
+--TABLE HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_PAYBILL_DTLS, WHERE (migration_flag = 'HRMS1');
+--TABLE HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_LEAVE_CREDIT, WHERE (migration_flag = 'HRMS1');
+--TABLE HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_LEAVE_AVAILING, WHERE (migration_flag = 'HRMS1');
+--TABLE HRMS2PP.HRMS2PLUS.HRMS2_EMPLOYEE_INSUR_TRANS, WHERE (migration_flag = 'HRMS1');
